@@ -38,3 +38,6 @@ sed -i 's/F8331/F8332/g' /system/build.prop
 
 sed -i 's/f8331/f8332/g' /system/vendor/build.prop
 sed -i 's/F8331/F8332/g' /system/vendor/build.prop
+
+cp /tmp/manifest.xml /system/vendor/etc/vintf/manifest.xml
+chcon u:object_r:vendor_configs_file:s0 /system/vendor/etc/vintf/manifest.xml
