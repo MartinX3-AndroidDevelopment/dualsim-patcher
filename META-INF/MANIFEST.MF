@@ -9,4 +9,3 @@ SHA1-Digest: uJNZZDs8asDZoQQ4YW14LiS+NHk=
 
 Name: tmp/patch_dualsim.sh
 SHA1-Digest: XTF79MjLP+lyn0lbLUR6Yn124KI=
-

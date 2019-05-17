@@ -9,6 +9,5 @@ SHA1-Digest: t46510otBHw3WKwFznqfVqBpYec=
 Name: META-INF/com/google/android/updater-script
 SHA1-Digest: tzgMZOBoCYwQ4NVH5iGfelDfhwE=
 
-Name: tmp/editbuildprop.sh
+Name: tmp/patch_dualsim.sh
 SHA1-Digest: IbhtsXqi025+UnYebnUeynMIEa4=
-
