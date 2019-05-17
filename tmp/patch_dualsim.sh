@@ -43,7 +43,7 @@ case $variant_lower in
         echo "Setting default_network to 9,1"
         ;;
     # apollo, akatsuki(2x), akari
-    h8324|h9436|H9493|h8266)
+    h8324|h9436|h9493|h8266)
         default_network="9,9"
         echo "Setting default_network to 9,9"
         ;;
