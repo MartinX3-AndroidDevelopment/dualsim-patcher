@@ -4,6 +4,8 @@ sbp="/system/build.prop"
 vbp="/vendor/build.prop"
 svbp="/system/vendor/build.prop"
 
+echo "Mounting LTALabel partition"
+
 mkdir /lta-label
 mount -t ext4 /dev/block/bootdevice/by-name/LTALabel /lta-label
 # Detect the exact model from the LTALabel partition
@@ -22,6 +24,8 @@ variant_upper=$(\
 );
 umount /lta-label
 
+echo "Model variant is ${variant_upper}"
+
 # Will be overriden later anyway
 #sed -i -r "s/(ro.product.board=).+/\1${variant_upper}/" $sbp
 #sed -i -r "s/(ro.product.board=).+/\1${variant_upper}/" $vbp
@@ -31,14 +35,17 @@ case $variant_lower in
     # voyager, pioneer, discovery, kirin, mermaid
     h4413|h4113|h4213|i4113|i4213)
         default_network="9,0"
+        echo "Setting default_network to 9,0"
         ;;
     # suzu, kagura, dora, keyaki, maple, poplar
-    f5122|f8332|f8132|g8232|g8142||g8342)
+    f5122|f8332|f8132|g8232|g8142|g8342)
         default_network="9,1"
+        echo "Setting default_network to 9,1"
         ;;
     # apollo, akatsuki(2x), akari
     h8324|h9436|H9493|h8266)
         default_network="9,9"
+        echo "Setting default_network to 9,9"
         ;;
 esac
 
@@ -48,11 +55,20 @@ echo "ro.telephony.default_network=${default_network}" >> /tmp/build.prop
 
 model=$(\
     cat /system/build.prop /system/vendor/build.prop /vendor/build.prop | \
-    grep ro.product.vendor.model | \
-    head -n 1 | \
+    grep "ro.product.vendor.model" | \
+    head -n 1 \
 )
 model=$(echo $model | sed 's/(AOSP)/Dual (AOSP)/')
-echo $model >> /tmp/build.prop
+sed -i '/ro.product.vendor.model/d' $sbp
+sed -i '/ro.product.vendor.model/d' $vbp
+sed -i '/ro.product.vendor.model/d' $svbp
+echo $model >> $sbp
+echo $model >> $vbp
+echo $model >> $svbp
+
+echo "Substituting props in /system/build.prop"
+echo "Substituting props in /system/vendor/build.prop"
+echo "Substituting props in /vendor/build.prop"
 
 for prop in `cat /tmp/build.prop`;do
   export newprop=$(echo ${prop} | cut -d '=' -f1)
@@ -153,8 +169,14 @@ sed -i "s/F5121/F5122/g" /vendor/build.prop
 
 # VINTF manifest patching
 # Add a second instance of every needed HAL
+echo "Patching VINTF manifest"
 sed -i -r 's/( +<(fqname|instance)>[^<>]*(slot)[^<>]*)1(<\/[^<>]+>)/\11\4\n\12\4/i' /system/vendor/etc/vintf/manifest.xml
 sed -i -r 's/( +<(fqname|instance)>[^<>]*(hook|radio|ril|uim)[^<>]*)0(<\/[^<>]+>)/\10\4\n\11\4/i' /system/vendor/etc/vintf/manifest.xml
 
+already_patched=$(cat /vendor/etc/vintf/manifest.xml | grep "slot2" | head -n 1)
+# Avoid duplicating if /system/vendor was linked to /vendor
+if [ -z $already_patched ];
+then
 sed -i -r 's/( +<(fqname|instance)>[^<>]*(slot)[^<>]*)1(<\/[^<>]+>)/\11\4\n\12\4/i' /vendor/etc/vintf/manifest.xml
 sed -i -r 's/( +<(fqname|instance)>[^<>]*(hook|radio|ril|uim)[^<>]*)0(<\/[^<>]+>)/\10\4\n\11\4/i' /vendor/etc/vintf/manifest.xml
+fi
