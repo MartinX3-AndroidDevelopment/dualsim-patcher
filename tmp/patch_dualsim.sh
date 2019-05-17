@@ -22,9 +22,10 @@ variant_upper=$(\
 );
 umount /lta-label
 
-sed -i -r "s/(ro.product.board=).+/\1${variant_upper}/" $sbp
-sed -i -r "s/(ro.product.board=).+/\1${variant_upper}/" $vbp
-sed -i -r "s/(ro.product.board=).+/\1${variant_upper}/" $svbp
+# Will be overriden later anyway
+#sed -i -r "s/(ro.product.board=).+/\1${variant_upper}/" $sbp
+#sed -i -r "s/(ro.product.board=).+/\1${variant_upper}/" $vbp
+#sed -i -r "s/(ro.product.board=).+/\1${variant_upper}/" $svbp
 
 case $variant_lower in
     # voyager, pioneer, discovery, kirin, mermaid
@@ -35,8 +36,8 @@ case $variant_lower in
     f5122|f8332|f8132|g8232|g8142||g8342)
         default_network="9,1"
         ;;
-    # apollo, akatsuki, akari
-    h8324|h9436|h8266)
+    # apollo, akatsuki(2x), akari
+    h8324|h9436|H9493|h8266)
         default_network="9,9"
         ;;
 esac
