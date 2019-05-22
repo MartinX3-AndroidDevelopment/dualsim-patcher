@@ -59,12 +59,9 @@ model=$(\
     head -n 1 \
 )
 model=$(echo $model | sed 's/(AOSP)/Dual (AOSP)/')
-sed -i '/ro.product.vendor.model/d' $sbp
-sed -i '/ro.product.vendor.model/d' $vbp
-sed -i '/ro.product.vendor.model/d' $svbp
-echo $model >> $sbp
-echo $model >> $vbp
-echo $model >> $svbp
+echo "$model" >> /tmp/build.prop
+echo "$model" >> /tmp/build.prop
+echo "$model" >> /tmp/build.prop
 
 echo "Substituting props in /system/build.prop"
 echo "Substituting props in /system/vendor/build.prop"
