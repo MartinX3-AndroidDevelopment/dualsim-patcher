@@ -19,3 +19,9 @@ flash via TWRP.
 
 For reference, a copy of the kagura dual-SIM `manifest.xml` is included in
 [vintf/ds_manifest.xml](vintf/ds_manifest.xml).
+
+## License
+MIT license.
+
+Credits to @gouster4 for the inital version of the DS patcher and to @oshmoun
+for writing the regex.
