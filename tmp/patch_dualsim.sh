@@ -4,6 +4,10 @@ sbp="/system/build.prop"
 vbp="/vendor/build.prop"
 svbp="/system/vendor/build.prop"
 
+# Check whether the vendor parts lie in /system/vendor
+# If /system/vendor points at vendor, we have a real /vendor partition
+[[ $(readlink /system/vendor) == "/vendor" ]] && vendor_on_system=false || vendor_on_system=true
+
 echo "Mounting LTALabel partition"
 
 mkdir /lta-label
@@ -62,21 +66,29 @@ model=$(echo $model | sed 's/(AOSP)/Dual (AOSP)/')
 echo "$model" >> /tmp/build.prop
 
 echo "Substituting props in /system/build.prop"
-echo "Substituting props in /system/vendor/build.prop"
-echo "Substituting props in /vendor/build.prop"
+if $vendor_on_system
+then
+    echo "Substituting props in /system/vendor/build.prop"
+else
+    echo "Substituting props in /vendor/build.prop"
+fi
 
 _ifs_backup=$IFS
 # Prevent prop names with spaces in them being split into multiple fields
 IFS=""
 for prop in `cat /tmp/build.prop`;do
-  export propname=$(echo "$prop" | cut -d '=' -f 1)
+    export propname=$(echo "$prop" | cut -d '=' -f 1)
 
-  sed -i "/$propname/d" $sbp
-  echo "$prop" >> $sbp
-  sed -i "/$propname/d" $vbp
-  echo "$prop" >> $vbp
-  sed -i "/$propname/d" $svbp
-  echo "$prop" >> $svbp
+    sed -i "/$propname/d" $sbp
+    echo "$prop" >> $sbp
+    if $vendor_on_system
+    then
+        sed -i "/$propname/d" $svbp
+        echo "$prop" >> $svbp
+    else
+        sed -i "/$propname/d" $vbp
+        echo "$prop" >> $vbp
+    fi
 done
 IFS=$_ifs_backup
 
@@ -169,13 +181,11 @@ sed -i "s/F5121/F5122/g" /vendor/build.prop
 # VINTF manifest patching
 # Add a second instance of every needed HAL
 echo "Patching VINTF manifest"
-sed -i -r 's/( +<(fqname|instance)>[^<>]*(slot)[^<>]*)1(<\/[^<>]+>)/\11\4\n\12\4/i' /system/vendor/etc/vintf/manifest.xml
-sed -i -r 's/( +<(fqname|instance)>[^<>]*(hook|radio|ril|uim)[^<>]*)0(<\/[^<>]+>)/\10\4\n\11\4/i' /system/vendor/etc/vintf/manifest.xml
-
-already_patched=$(cat /vendor/etc/vintf/manifest.xml | grep "slot2" | head -n 1)
-# Avoid duplicating if /system/vendor was linked to /vendor
-if [ -z $already_patched ];
+if $vendor_on_system
 then
-sed -i -r 's/( +<(fqname|instance)>[^<>]*(slot)[^<>]*)1(<\/[^<>]+>)/\11\4\n\12\4/i' /vendor/etc/vintf/manifest.xml
-sed -i -r 's/( +<(fqname|instance)>[^<>]*(hook|radio|ril|uim)[^<>]*)0(<\/[^<>]+>)/\10\4\n\11\4/i' /vendor/etc/vintf/manifest.xml
+    sed -i -r 's/( +<(fqname|instance)>[^<>]*(slot)[^<>]*)1(<\/[^<>]+>)/\11\4\n\12\4/i' /system/vendor/etc/vintf/manifest.xml
+    sed -i -r 's/( +<(fqname|instance)>[^<>]*(hook|radio|ril|uim)[^<>]*)0(<\/[^<>]+>)/\10\4\n\11\4/i' /system/vendor/etc/vintf/manifest.xml
+else
+    sed -i -r 's/( +<(fqname|instance)>[^<>]*(slot)[^<>]*)1(<\/[^<>]+>)/\11\4\n\12\4/i' /vendor/etc/vintf/manifest.xml
+    sed -i -r 's/( +<(fqname|instance)>[^<>]*(hook|radio|ril|uim)[^<>]*)0(<\/[^<>]+>)/\10\4\n\11\4/i' /vendor/etc/vintf/manifest.xml
 fi
