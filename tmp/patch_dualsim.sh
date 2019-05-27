@@ -73,11 +73,12 @@ else
     echo "Substituting props in /vendor/build.prop"
 fi
 
-_ifs_backup=$IFS
+ifs_backup="$IFS"
 # Prevent prop names with spaces in them being split into multiple fields
-IFS=""
-for prop in `cat /tmp/build.prop`;do
-    export propname=$(echo "$prop" | cut -d '=' -f 1)
+IFS=$'\n'
+for prop in `cat /tmp/build.prop`
+do
+    propname=$(echo "$prop" | cut -d '=' -f 1)
 
     sed -i "/$propname/d" $sbp
     echo "$prop" >> $sbp
@@ -90,7 +91,7 @@ for prop in `cat /tmp/build.prop`;do
         echo "$prop" >> $vbp
     fi
 done
-IFS=$_ifs_backup
+IFS="$_ifs_backup"
 
 # kirin
 sed -i "s/i3113/i4113/g" /system/build.prop
