@@ -60,23 +60,25 @@ model=$(\
 )
 model=$(echo $model | sed 's/(AOSP)/Dual (AOSP)/')
 echo "$model" >> /tmp/build.prop
-echo "$model" >> /tmp/build.prop
-echo "$model" >> /tmp/build.prop
 
 echo "Substituting props in /system/build.prop"
 echo "Substituting props in /system/vendor/build.prop"
 echo "Substituting props in /vendor/build.prop"
 
+_ifs_backup=$IFS
+# Prevent prop names with spaces in them being split into multiple fields
+IFS=""
 for prop in `cat /tmp/build.prop`;do
-  export newprop=$(echo ${prop} | cut -d '=' -f1)
+  export propname=$(echo "$prop" | cut -d '=' -f 1)
 
-  sed -i "/${newprop}/d" $sbp
-  echo $prop >> $sbp
-  sed -i "/${newprop}/d" $vbp
-  echo $prop >> $vbp
-  sed -i "/${newprop}/d" $svbp
-  echo $prop >> $svbp
+  sed -i "/$propname/d" $sbp
+  echo "$prop" >> $sbp
+  sed -i "/$propname/d" $vbp
+  echo "$prop" >> $vbp
+  sed -i "/$propname/d" $svbp
+  echo "$prop" >> $svbp
 done
+IFS=$_ifs_backup
 
 # kirin
 sed -i "s/i3113/i4113/g" /system/build.prop
