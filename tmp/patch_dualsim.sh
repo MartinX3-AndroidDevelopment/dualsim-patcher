@@ -73,7 +73,7 @@ else
     echo "Substituting props in /vendor/build.prop"
 fi
 
-ifs_backup="$IFS"
+_ifs_backup="$IFS"
 # Prevent prop names with spaces in them being split into multiple fields
 IFS=$'\n'
 for prop in `cat /tmp/build.prop`
