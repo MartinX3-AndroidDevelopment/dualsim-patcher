@@ -49,7 +49,7 @@ case $variant_lower in
         ;;
 esac
 
-echo " " >> /tmp/build.prop
+rm -f /tmp/build.prop
 echo "persist.vendor.radio.multisim.config=dsds" >> /tmp/build.prop
 echo "ro.telephony.default_network=${default_network}" >> /tmp/build.prop
 
