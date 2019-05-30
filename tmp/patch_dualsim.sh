@@ -16,7 +16,7 @@ function check_if_system_as_root() {
 # Sanity check - was this patch already flashed?
 function check_if_already_patched() {
     echo "Checking if already patched"
-    if $(cat ${system_path}/vendor/etc/vintf/manifest.xml | grep slot2)
+    if [ ! -z "$(cat ${system_path}/vendor/etc/vintf/manifest.xml | grep slot2)" ]
     then
         echo "Already patched"
         exit 0
