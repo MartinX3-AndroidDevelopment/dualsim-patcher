@@ -8,6 +8,22 @@ svbp="/system/vendor/build.prop"
 # If /system/vendor points at vendor, we have a real /vendor partition
 [[ $(readlink /system/vendor) == "/vendor" ]] && vendor_on_system=false || vendor_on_system=true
 
+# Sanity check - was this patch already flashed?
+if $vendor_on_system
+then
+    if $(cat /system/vendor/etc/vintf/manifest.xml | grep slot2)
+    then
+        echo "Already patched"
+        exit 0
+    fi
+else
+    if $(cat /vendor/etc/vintf/manifest.xml | grep slot2)
+    then
+        echo "Already patched"
+        exit 0
+    fi
+fi
+
 echo "Mounting LTALabel partition"
 
 mkdir /lta-label
