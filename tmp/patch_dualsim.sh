@@ -44,8 +44,8 @@ function get_the_LTA_Label() {
 
 function get_the_default_network_from_device_variant() {
     case ${device_variant} in
-        # voyager, pioneer, discovery, kirin, mermaid
-        h4413|h4113|h4213|i4113|i4213)
+        # voyager, pioneer, discovery, kirin(2x), mermaid(2x)
+        h4413|h4113|h4213|i4113|i4193|i4213|i4293)
             default_network="9,0"
             ;;
         # suzu, kagura, dora, keyaki, maple, poplar
@@ -56,6 +56,9 @@ function get_the_default_network_from_device_variant() {
         h8324|h9436|h9493|h8266|h8296)
             default_network="9,9"
             ;;
+        # griffin(x)
+        #j8110|j9119)
+        # not released on SODP yet
     esac
     echo "Setting default_network to $default_network"
 }
