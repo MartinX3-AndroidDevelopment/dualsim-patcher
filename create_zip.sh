@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-VERSION=3
+VERSION=4
 mkdir -p zips
 
 if [ -f zips/sony-dualsim-patcher-v${VERSION}.zip ]
