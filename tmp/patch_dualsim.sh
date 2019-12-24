@@ -59,9 +59,11 @@ function get_default_network_from_device_variant() {
         h8324|h9436|h9493|h8266|h8296)
             default_network="9,9"
             ;;
-        # griffin(x)
-        #j8110|j9119)
-        # not released on SODP yet
+        # griffin, bahamut
+        j9110|j9210)
+            default_network="9,9"
+            block_allow_data=0
+            ;;
     esac
     echo "Setting default_network to $default_network"
 }
@@ -70,6 +72,11 @@ function set_build_prop_dual_sim_values() {
     rm -f /tmp/build.prop
     echo "persist.vendor.radio.multisim.config=dsds" >> /tmp/build.prop
     echo "ro.telephony.default_network=$default_network" >> /tmp/build.prop
+    if [ ! -z $block_allow_data ]
+    # kumano devices
+    then
+        echo "persist.vendor.radio.block_allow_data=$block_allow_data" >> /tmp/build.prop
+    fi
 
     model=$(\
         cat ${system_path}/build.prop ${system_path}/vendor/build.prop | \
