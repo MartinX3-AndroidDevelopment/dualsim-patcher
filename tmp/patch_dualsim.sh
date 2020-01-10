@@ -1,22 +1,33 @@
 #!/sbin/sh
 
-system_path=/system
+vendor_path=/vendor
 device_variant=
 default_network=
 
 # If we have system-as-root the system is mounted at /system/system in twrp
-function check_system_as_root() {
-    echo "Checking if system-as-root"
-    if [ -d ${system_path}/system ]
+function check_vendor_on_system() {
+    echo "Checking whether /vendor is on /system (Pre-Treble)"
+    # On Android 10, system-as-root means system.img will contain ./system and
+    # ./vendor.
+    # /vendor will never be in /system/system/vendor
+    if [ -f /system/vendor/etc/vintf/manifest.xml ]
     then
-        system_path=${system_path}/system
+        vendor_path=/system/vendor
+    fi
+}
+
+function check_oem_as_vendor() {
+    echo "Checking whether /oem is used as /vendor (Fake Treble)"
+    if [ -f /oem/etc/vintf/manifest.xml ]
+    then
+        vendor_path=/oem
     fi
 }
 
 # Sanity check - was this patch already flashed?
 function check_already_patched() {
     echo "Checking if already patched"
-    if [ ! -z "$(cat ${system_path}/vendor/etc/vintf/manifest.xml | grep slot2)" ]
+    if [ ! -z "$(cat ${vendor_path}/etc/vintf/manifest.xml | grep slot2)" ]
     then
         echo "Already patched"
         exit 0
@@ -79,15 +90,14 @@ function set_build_prop_dual_sim_values() {
     fi
 
     model=$(\
-        cat ${system_path}/build.prop ${system_path}/vendor/build.prop | \
+        cat ${vendor_path}/build.prop | \
         grep "ro.product.vendor.model" | \
         head -n 1 \
     )
     model=$(echo ${model} | sed 's/(AOSP)/Dual (AOSP)/')
     echo "$model" >> /tmp/build.prop
 
-    echo "Substituting props in $system_path/build.prop"
-    echo "Substituting props in $system_path/vendor/build.prop"
+    echo "Substituting props in $vendor_path/build.prop"
 
     # Prevent prop names with spaces in them being split into multiple fields
     IFS=$'\n'
@@ -95,27 +105,25 @@ function set_build_prop_dual_sim_values() {
     do
         propname=$(echo "$prop" | cut -d '=' -f 1)
 
-        sed -i "/$propname/d" ${system_path}/build.prop
-        echo "$prop" >> ${system_path}/build.prop
-        sed -i "/$propname/d" ${system_path}/vendor/build.prop
-        echo "$prop" >> ${system_path}/vendor/build.prop
+        sed -i "/$propname/d" ${vendor_path}/build.prop
+        echo "$prop" >> ${vendor_path}/build.prop
     done
 }
 
 function set_build_prop_device_model_values() {
-    sed -i "s/$1/$2/g" ${system_path}/build.prop
-    sed -i "s/$1/$2/g" ${system_path}/vendor/build.prop
+    sed -i "s/$1/$2/g" ${vendor_path}/build.prop
 }
 
 # VINTF manifest patching
 # Add a second instance of every needed HAL
 function patch_vintf_manifest() {
     echo "Patching VINTF manifest"
-    sed -i -r 's/( +<(fqname|instance)>[^<>]*(slot)[^<>]*)1(<\/[^<>]+>)/\11\4\n\12\4/i' ${system_path}/vendor/etc/vintf/manifest.xml
-    sed -i -r 's/( +<(fqname|instance)>[^<>]*(hook|radio|ril|uim)[^<>]*)0(<\/[^<>]+>)/\10\4\n\11\4/i' ${system_path}/vendor/etc/vintf/manifest.xml
+    sed -i -r 's/( +<(fqname|instance)>[^<>]*(slot)[^<>]*)1(<\/[^<>]+>)/\11\4\n\12\4/i' ${vendor_path}/etc/vintf/manifest.xml
+    sed -i -r 's/( +<(fqname|instance)>[^<>]*(hook|radio|ril|uim)[^<>]*)0(<\/[^<>]+>)/\10\4\n\11\4/i' ${vendor_path}/etc/vintf/manifest.xml
 }
 
-check_system_as_root;
+check_vendor_on_system;
+check_oem_as_vendor;
 check_already_patched;
 get_lta_label;
 get_default_network_from_device_variant;
