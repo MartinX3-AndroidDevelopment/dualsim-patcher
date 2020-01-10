@@ -165,6 +165,8 @@ check_oem_as_vendor;
 ui_print "/vendor located at $vendor_path"
 
 get_lta_label;
+check_already_patched;
+assign_props;
 
 if [ $device_supported = false ]
 then
@@ -177,10 +179,8 @@ then
     exit 1
 fi
 
-check_already_patched;
-
-assign_props;
 set_build_prop_dual_sim_values;
+
 
 # griffin
 substitute_in_build_prop j8110 j9110;
