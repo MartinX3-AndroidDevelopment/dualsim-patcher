@@ -4,19 +4,36 @@ ui_print("     Dualsim support");
 ui_print("            by");
 ui_print(" Gouster4, oshmoun, local__hero & MartinX3");
 ui_print("------------------------------------");
+ui_print("");
+
+ui_print("Getting current slot (if on A/B)");
+
+if
+    getprop("ro.boot.slot_suffix")
+then
+    ui_print("Current slot is " + getprop("ro.boot.slot_suffix"));
+else
+    ui_print("Non-A/B device!");
+endif;
+
 ui_print("Mounting system partition...");
 run_program("/sbin/mkdir", "/mnt/system");
-run_program("/sbin/mount", "/dev/block/bootdevice/by-name/system", "/mnt/system");
+run_program("/sbin/mount", "/dev/block/bootdevice/by-name/system" + getprop("ro.boot.slot_suffix"), "/mnt/system");
+
 ui_print("Mounting vendor partition (may fail) ...");
 run_program("/sbin/mount", "/vendor");
+
 ui_print("Mounting oem partition (may fail) ...");
 run_program("/sbin/mount", "/oem");
+
 ui_print("Running patch script...");
 package_extract_dir("tmp", "/tmp");
 set_perm(0, 0, 0777, "/tmp/patch_dualsim.sh");
 run_program("/tmp/patch_dualsim.sh");
+
+ui_print("");
 ui_print("Unmounting system partition...");
-unmount("/system");
+unmount("/mnt/system");
 ui_print("Unmounting vendor partition (may fail) ...");
 unmount("/vendor");
 ui_print("Unmounting oem partition (may fail) ...");

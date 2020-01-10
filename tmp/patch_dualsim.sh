@@ -82,7 +82,7 @@ get_lta_label() {
         tr '[:upper:]' '[:lower:]' \
     );
     umount /lta-label
-    rm /lta-label
+    rm -r /lta-label
     ui_print "Device variant is ${device_variant}"
 }
 
