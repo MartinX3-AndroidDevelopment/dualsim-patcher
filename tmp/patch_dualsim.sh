@@ -25,27 +25,13 @@ ui_print() {
   fi;
 }
 
-system_mount=/mnt/system
+# Since Android 10 every device is forced to use SAR
+system_mount=/system_root/system
 vendor_path=/vendor
 device_variant=
 device_supported=false
 default_network=
 block_allow_data=
-
-# If we have system-as-root the system is mounted at /system/system in twrp
-check_vendor_on_system() {
-    ui_print "Checking whether /vendor is on /system (Pre-Treble)"
-    # Variant 1: Non-System-as-Root
-    # Variant 2: Q System-as-Root, system partition contains ramdisk, vendor inside own folder
-    if [ -f ${system_mount}/vendor/etc/vintf/manifest.xml ]
-    then
-        vendor_path=${system_mount}/vendor
-    # Variant 3: System-as-Root, system partition contains ramdisk, /vendor still inside /system/vendor
-    elif [ -f ${system_mount}/system/vendor/etc/vintf/manifest.xml ]
-    then
-        vendor_path=${system_mount}/system/vendor
-    fi
-}
 
 check_oem_as_vendor() {
     ui_print "Checking whether /oem is used as /vendor (Fake Treble)"
@@ -163,9 +149,7 @@ patch_vintf_manifest() {
 
 ui_print ""
 
-check_vendor_on_system;
 check_oem_as_vendor;
-ui_print "/vendor located at $vendor_path"
 
 get_lta_label;
 check_already_patched;

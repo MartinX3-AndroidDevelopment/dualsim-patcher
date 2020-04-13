@@ -6,19 +6,9 @@ ui_print(" Gouster4, oshmoun, local__hero & MartinX3");
 ui_print("------------------------------------");
 ui_print("");
 
-ui_print("Getting current slot (if on A/B)");
-
-if
-    getprop("ro.boot.slot_suffix")
-then
-    ui_print("Current slot is " + getprop("ro.boot.slot_suffix"));
-else
-    ui_print("Non-A/B device!");
-endif;
-
-ui_print("Mounting system partition...");
+ui_print("Mounting system partition as SAR...");
 run_program("/sbin/mkdir", "/mnt/system");
-run_program("/sbin/mount", "/dev/block/bootdevice/by-name/system" + getprop("ro.boot.slot_suffix"), "/mnt/system");
+run_program("/sbin/mount", "/system_root");
 
 ui_print("Mounting vendor partition (may fail) ...");
 run_program("/sbin/mount", "/vendor");
@@ -33,7 +23,7 @@ run_program("/tmp/patch_dualsim.sh");
 
 ui_print("");
 ui_print("Unmounting system partition...");
-unmount("/mnt/system");
+unmount("/system_root");
 ui_print("Unmounting vendor partition (may fail) ...");
 unmount("/vendor");
 ui_print("Unmounting oem partition (may fail) ...");
