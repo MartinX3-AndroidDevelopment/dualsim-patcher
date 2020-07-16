@@ -35,9 +35,12 @@ block_allow_data=
 # If we have system-as-root the system is mounted at /system/system in twrp
 check_vendor_on_system() {
     ui_print "Checking whether /vendor is on /system (Pre-Treble)"
+    # Variant 1: Non-System-as-Root
+    # Variant 2: Q System-as-Root, system partition contains ramdisk, vendor inside own folder
     if [ -f ${system_mount}/vendor/etc/vintf/manifest.xml ]
     then
         vendor_path=${system_mount}/vendor
+    # Variant 3: System-as-Root, system partition contains ramdisk, /vendor still inside /system/vendor
     elif [ -f ${system_mount}/system/vendor/etc/vintf/manifest.xml ]
     then
         vendor_path=${system_mount}/system/vendor
@@ -88,8 +91,8 @@ get_lta_label() {
 
 assign_props() {
     case ${device_variant} in
-        # voyager, pioneer, discovery, kirin(2x), mermaid(2x)
-        h4413|h4113|h4213|i4113|i4193|i4213|i4293)
+        # voyager, pioneer, discovery, kirin(2x), mermaid(2x), pdx201
+        h4413|h4113|h4213|i4113|i4193|i4213|i4293|xqau52)
             default_network="9,0"
             device_supported=true
             ;;
@@ -155,7 +158,7 @@ substitute_in_build_prop() {
 patch_vintf_manifest() {
     ui_print "Patching VINTF manifest"
     sed -i -r 's/( +<(fqname|instance)>[^<>]*(slot)[^<>]*)1(<\/[^<>]+>)/\11\4\n\12\4/i' ${vendor_path}/etc/vintf/manifest.xml
-    sed -i -r 's/( +<(fqname|instance)>[^<>]*(hook|radio|ril|uim)[^<>]*)0(<\/[^<>]+>)/\10\4\n\11\4/i' ${vendor_path}/etc/vintf/manifest.xml
+    sed -i -r 's/( +<(fqname|instance)>[^<>]*(hook|radio|ril|uim|iiwlan|idataconnection)[^<>]*)0(<\/[^<>]+>)/\10\4\n\11\4/i' ${vendor_path}/etc/vintf/manifest.xml
 }
 
 ui_print ""
@@ -181,6 +184,11 @@ fi
 
 set_build_prop_dual_sim_values;
 
+
+# pdx201
+substitute_in_build_prop xqau51 xqau52;
+substitute_in_build_prop XQAU51 XQAU52;
+substitute_in_build_prop XQ-AU51 XQ-AU52;
 
 # griffin
 substitute_in_build_prop j8110 j9110;
